@@ -1622,7 +1622,7 @@ In VPS can not update by a click!<br>';
     <button onclick="querybranchs();return false">查询分支</button>
     <!--<input type="text" name="branch" placeholder="auth" value="master">-->
     <select name="branch">
-        <option value=""></option>
+        <option value="master">master</option>
     </select>
     <input type="submit" name="updateProgram" value="'.getconstStr('updateProgram').'">
 </form>
@@ -1636,20 +1636,24 @@ In VPS can not update by a click!<br>';
         xhr.send(null);
         xhr.onload = function(e){
             console.log(xhr.responseText+","+xhr.status);
-            document.updateform.branch.options.length=0;
-            JSON.parse(xhr.responseText).forEach( function (e) {
-                //alert(e.name);
-                document.updateform.branch.options.add(new Option(e.name,e.name));
-                if ("master"==e.name) document.updateform.branch.options[document.updateform.branch.options.length-1].selected = true; 
-            });
+            if (xhr.status==200) {
+                document.updateform.branch.options.length=0;
+                JSON.parse(xhr.responseText).forEach( function (e) {
+                    //alert(e.name);
+                    document.updateform.branch.options.add(new Option(e.name,e.name));
+                    if ("master"==e.name) document.updateform.branch.options[document.updateform.branch.options.length-1].selected = true; 
+                });
+            } else {
+                alert(xhr.responseText+"\n"+xhr.status);
+            }
+        }
+        xhr.onerror = function(e){
+            alert("Network Error "+xhr.status);
         }
     }
 </script>
 ';
     }
-    /*$branchs = json_decode(curl_request('https://api.github.com/repos/qkqpttgf/OneManager-php/branches',false,[ 'User-Agent' => 'qkqpttgf/OneManager' ])['body'], true);
-    foreach ($branchs as $b) $html .= $b['name'].'<br>';
-    //$html .= $branchs;*/
     if ($needUpdate) {
         $html .= '<div style="position:relative;word-wrap: break-word;">
         ' . str_replace("\r", '<br>',$_SERVER['github_version']) . '
