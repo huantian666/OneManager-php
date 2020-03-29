@@ -1082,8 +1082,7 @@ function fetch_files($path = '/')
         }
         if ($arr['stat']<500) {
             $files = json_decode($arr['body'], true);
-            echo $path . '<br><pre>' . json_encode($arr, JSON_PRETTY_PRINT) . '</pre>
-            ';
+            //echo $path . '<br><pre>' . json_encode($arr, JSON_PRETTY_PRINT) . '</pre>';
             if (isset($files['folder'])) {
                 if ($files['folder']['childCount']>200) {
                     // files num > 200 , then get nextlink
