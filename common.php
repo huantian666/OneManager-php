@@ -1468,7 +1468,7 @@ function EnvOpt($needUpdate = 0)
     asort($ShowedInnerEnv);
     $html = '<title>OneManager '.getconstStr('Setup').'</title>';
     if (isset($_POST['updateProgram'])&&$_POST['updateProgram']==getconstStr('updateProgram')) {
-        $response = OnekeyUpate();
+        $response = OnekeyUpate($_POST['auth'], $_POST['project'], $_POST['branch']);
         if (api_error($response)) {
             $html = api_error_msg($response);
             $title = 'Error';
@@ -1518,22 +1518,7 @@ function EnvOpt($needUpdate = 0)
     $html .= '
 <a href="'.$preurl.'">'.getconstStr('Back').'</a>&nbsp;&nbsp;&nbsp;<a href="'.$_SERVER['base_path'].'">'.getconstStr('Back').getconstStr('Home').'</a><br>
 <a href="https://github.com/qkqpttgf/OneManager-php">Github</a><br>';
-    if (!((isset($_SERVER['USER'])&&$_SERVER['USER']==='qcloud')||(isset($_SERVER['HEROKU_APP_DIR'])&&$_SERVER['HEROKU_APP_DIR']==='/app'))) {
-        $html .= '
-In VPS can not update by a click!<br>';
-    } else {
-        $html .= '
-<form action="" method="post">
-';
-        if ($needUpdate) {
-            $html .= '<pre>' . $_SERVER['github_version'] . '</pre>';
-        } else {
-            $html .= getconstStr('NotNeedUpdate');
-        }
-        $html .= '
-    <input type="submit" name="updateProgram" value="'.getconstStr('updateProgram').'">
-</form>';
-    }
+
     $html .= '
 <table border=1 width=100%>
     <form name="common" action="" method="post">
@@ -1562,7 +1547,7 @@ In VPS can not update by a click!<br>';
             <td><label>' . $key . '</label></td>
             <td width=100%>
                 <select name="' . $key .'">
-                <option value=""></option>';
+                    <option value=""></option>';
             foreach ($theme_arr as $v1) {
                 if ($v1!='.' && $v1!='..') $html .= '
                     <option value="'.$v1.'" '.($v1==getConfig($key)?'selected="selected"':'').'>'.$v1.'</option>';
@@ -1626,5 +1611,51 @@ In VPS can not update by a click!<br>';
     }
     $html .= '
 <a href="?AddDisk">'.getconstStr('AddDisk').'</a>';
+    if (!((isset($_SERVER['USER'])&&$_SERVER['USER']==='qcloud')||(isset($_SERVER['HEROKU_APP_DIR'])&&$_SERVER['HEROKU_APP_DIR']==='/app'))) {
+        $html .= '
+In VPS can not update by a click!<br>';
+    } else {
+        $html .= '
+<form name="updateform" action="" method="post">
+    <input type="text" name="auth" placeholder="auth" value="qkqpttgf">
+    <input type="text" name="project" placeholder="project" value="OneManager-php">
+    <button onclick="querybranchs();return false">查询分支</button>
+    <!--<input type="text" name="branch" placeholder="auth" value="master">-->
+    <select name="branch">
+        <option value=""></option>
+    </select>
+    <input type="submit" name="updateProgram" value="'.getconstStr('updateProgram').'">
+</form>
+<script>
+    function querybranchs()
+    {
+        //alert(document.updateform.auth.value);
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "https://api.github.com/repos/"+document.updateform.auth.value+"/"+document.updateform.project.value+"/branches");
+        //xhr.setRequestHeader("User-Agent","qkqpttgf/OneManager");
+        xhr.send(null);
+        xhr.onload = function(e){
+            console.log(xhr.responseText+","+xhr.status);
+            document.updateform.branch.options.length=0;
+            JSON.parse(xhr.responseText).forEach( function (e) {
+                //alert(e.name);
+                document.updateform.branch.options.add(new Option(e.name,e.name));
+                if ("master"==e.name) document.updateform.branch.options[document.updateform.branch.options.length-1].selected = true; 
+            });
+        }
+    }
+</script>
+';
+    }
+    /*$branchs = json_decode(curl_request('https://api.github.com/repos/qkqpttgf/OneManager-php/branches',false,[ 'User-Agent' => 'qkqpttgf/OneManager' ])['body'], true);
+    foreach ($branchs as $b) $html .= $b['name'].'<br>';
+    //$html .= $branchs;*/
+    if ($needUpdate) {
+        $html .= '<div style="position:relative;word-wrap: break-word;">
+        ' . str_replace("\r", '<br>',$_SERVER['github_version']) . '
+</div>';
+    } else {
+        $html .= getconstStr('NotNeedUpdate');
+    }
     return message($html, getconstStr('Setup'));
 }
