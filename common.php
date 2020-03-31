@@ -1609,7 +1609,7 @@ function EnvOpt($needUpdate = 0)
         }
     }
     $html .= '
-<a href="?AddDisk">'.getconstStr('AddDisk').'</a>';
+<a href="?AddDisk">'.getconstStr('AddDisk').'</a><br><br>';
     if (!((isset($_SERVER['USER'])&&$_SERVER['USER']==='qcloud')||(isset($_SERVER['HEROKU_APP_DIR'])&&$_SERVER['HEROKU_APP_DIR']==='/app'))) {
         $html .= '
 In VPS can not update by a click!<br>';
